@@ -4,17 +4,30 @@
 
 ## 订阅地址
 
-走 jsDelivr 的 **Fastly** 节点（本线路直连实测可用）：
+走 jsDelivr 的 **Fastly** 节点（本线路直连实测可用）。
+
+### 主地址（固定不变，推荐）
 
 ```
-https://fastly.jsdelivr.net/gh/eye1130/iptv@master/mobile/iptv4_mobile.m3u
-https://fastly.jsdelivr.net/gh/eye1130/iptv@master/mobile/iptv4_mobile.txt
+https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile.m3u
+https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile.txt
 ```
+
+`@latest` 跟随默认分支 HEAD，**地址永远不用改**。代价是 jsDelivr 对分支引用有约 12 小时 CDN 缓存，所以源更新后最多滞后半天自动同步。
+
+### 立即取到最新版（版本标签）
+
+每次重新扫描会打一个新标签，标签地址**立即生效且永久缓存**（速度快）：
+
+```
+https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261005/mobile/iptv4_mobile.m3u
+```
+
+> ⚠️ **不要用 `@master`**。`@master` 与 `@latest` 语义相同，但实测该缓存键被 CDN 缓存了旧内容（只有 497 条，且 TTFB 高达 36.9s）。用 `@latest` 或具体标签。
 
 > ⚠️ 实测结论：`cdn.jsdelivr.net`、`gcore.jsdelivr.net`、`raw.githubusercontent.com`、`gh-proxy` / `ghfast.top` / `gitmirror` 系加速，在本线路**全部不可达**。只有 `fastly.jsdelivr.net` 通。
->
-> jsDelivr 对分支引用有约 12 小时缓存。要立即取到最新版，改用版本标签地址：
-> `https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261005/mobile/iptv4_mobile.m3u`
+
+> ⚠️ 播放器端通常也有自己的订阅刷新周期（常见 6–24 小时）。换新地址后在播放器里**手动刷新订阅**，否则会继续播旧缓存列表。
 
 ## 数据说明
 
