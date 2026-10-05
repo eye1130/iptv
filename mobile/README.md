@@ -4,44 +4,55 @@
 
 ## 订阅地址
 
-走 jsDelivr 的 **Fastly** 节点（本线路实测可直连）：
+走 jsDelivr 的 **Fastly** 节点（本线路直连实测可用）：
 
 ```
 https://fastly.jsdelivr.net/gh/eye1130/iptv@master/mobile/iptv4_mobile.m3u
 https://fastly.jsdelivr.net/gh/eye1130/iptv@master/mobile/iptv4_mobile.txt
 ```
 
-> ⚠️ 实测结论：`cdn.jsdelivr.net`、`gcore.jsdelivr.net`、`raw.githubusercontent.com`、`gh-proxy` / `ghfast.top` / `gitmirror` 系加速，在本线路**全部不可达**。只有 `fastly.jsdelivr.net` 通（200，TTFB 0.515s）。
+> ⚠️ 实测结论：`cdn.jsdelivr.net`、`gcore.jsdelivr.net`、`raw.githubusercontent.com`、`gh-proxy` / `ghfast.top` / `gitmirror` 系加速，在本线路**全部不可达**。只有 `fastly.jsdelivr.net` 通。
+>
+> jsDelivr 对分支引用有约 12 小时缓存。要立即取到最新版，改用版本标签地址：
+> `https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261005/mobile/iptv4_mobile.m3u`
 
 ## 数据说明
 
 | 项 | 值 |
 |---|---|
 | 生成时间 | 2026-10-05 |
-| 输入源库 | `live.zbds.top`、`YanG-1989/m3u`、`iptv-org/iptv`（仅取 CCTV/CGTN） |
-| 候选唯一源 | 865 |
-| 连通 | 545 |
-| 优质（≥2Mbps 且 TTFB≤2s） | 374 |
-| 保留 | 430 频道 / 497 源 |
-| 覆盖 | 央视 17/18（缺 CCTV6）、卫视 21 个 |
+| 输入源库 | `live.zbds.top`、`kimwang1978/collect-tv-txt`（bbxx365_lite）、`YanG-1989/m3u`、`iptv-org/iptv` |
+| 候选唯一源 | 7760 |
+| 连通 | 2624 |
+| 优质（≥2Mbps 且 TTFB≤2s） | 1244 |
+| 保留 | **955 频道 / 1308 源** |
+| 覆盖 | 央视 18/18（含 CCTV6）、央视系 42 个、卫视 **47** 个 |
 
-筛选口径：两阶段实测——先拉 m3u8 取 HTTP 状态与 TTFB，再解析 ts 分片实测 3 秒真实下载速率。
-不达标频道回退到"仅可连通"的源，保证频道不丢。
+筛选口径：两阶段实测——先拉 m3u8 取 HTTP 状态与 TTFB，再解析 ts 分片实测 3 秒真实下载速率。每频道保留最优 3 个源，单源失效时仍有备用。
+
+## 效果对比
+
+| 项 | 换库前 | 换库后 |
+|---|---|---|
+| CCTV5 | 0.94 Mbps（唯一可用源） | **32.85 Mbps** |
+| 卫视数 | 21 | **47** |
+| 频道总数 | 430 | **955** |
+
+> 关键教训：**源库的选择决定成品下限**。小合集里 CCTV5 只有一个 0.94Mbps 的源；大合集（bbxx365_lite，7381 条）里同一频道有 101 个候选、最好 50Mbps。
 
 ## 已知短板
 
-- **CCTV5 只有 0.94 Mbps**（`gmxw.7766.org`），全网找不到更好的公网源。看体育直播会卡。
-- 移动咪咕源（`cmvideo.cn`）返回 302，跳转后需 **IPTV 专网**，公网不可达。
-- 熔断名单里的 `223.110.245.x`、`183.207.x.x`、`39.134/39.135.x` 均为移动 IPTV 专网段，普通宽访问不到。
+- 移动咪咕源（`cmvideo.cn`）与省级运营商源（`39.130.x.x` 云南移动）返回 302 或不可达，**需 IPTV 专网**，公网访问不到。
+- 大量优质源是各省 IPTV 转出（`key=txiptv`、`:9901/tsfile/`），生命周期短，**建议每周重跑一次**。
 - 测速于 2026-10-05 深夜完成，晚间高峰（20:00–22:00）码率会衰减。
 
 ## 重新生成
 
 ```bash
 python scripts/scan_sources.py \
-  --in data/raw/iptv4.m3u data/raw/yang-gather.m3u data/raw/iptv-org-cctv.m3u \
+  --in data/raw/iptv4.m3u data/raw/bbxx-lite.m3u data/raw/yang-gather.m3u data/raw/iptv-org-cctv.m3u \
   --txt data/raw/iptv4.txt \
-  --out data/out --workers 48 --top 2 --min-mbps 2.0 --max-ttfb 2.0
+  --out data/out --workers 64 --top 3 --min-mbps 2.0 --max-ttfb 2.0
 ```
 
 单频道体检：
