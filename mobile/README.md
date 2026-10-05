@@ -41,6 +41,24 @@ https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/tvbox.json
 
 > ⚠️ B 方案的 JSON 里 `sites` 是空数组（不含点播源），所以它**只提供直播**。填进去会新增一个仓库，选中后点播页是空的——别把它当主配置用，看完直播切回原仓库即可。
 
+## 地址状态（2026-10-05 23:50 实测）
+
+`@latest` 与 `@master` 这类**分支引用**会被 jsDelivr 缓存约 12 小时，实测当前仍吐出**修复前的旧内容**（466 个 `#genre#`，分组解析会乱）。所以下面区分两栏：
+
+| 用途 | 分支引用（长期，滞后 ≤12h） | 钉版引用（**立即生效**） |
+|---|---|---|
+| 直播源（txt） | `…@latest/mobile/iptv4_mobile.txt` | `…@4283239/mobile/iptv4_mobile.txt` |
+| 直播源（m3u） | `…@latest/mobile/iptv4_mobile.m3u` | `…@4283239/mobile/iptv4_mobile.m3u` |
+| 配置地址（JSON） | `…@latest/mobile/tvbox.json` | `…@c3e04d2/mobile/tvbox.json` |
+
+前缀统一为 `https://fastly.jsdelivr.net/gh/eye1130/iptv`。
+
+**判断内容新旧**：txt 里 `#genre#` 出现 **32 次**是修复版；**466 次**是旧版。
+
+`tvbox.json` 内部的直播源地址已钉在修复版 commit 上，所以即使外层 JSON 走的是滞后的 `@latest`，拉到的直播列表仍是修复版。
+
+> ⚠️ **不要用 `@master`**。语义与 `@latest` 相同，但该缓存键被缓存了更旧的内容（497 条，TTFB 36.9s）。
+
 ## 订阅地址（通用播放器）
 
 走 jsDelivr 的 **Fastly** 节点（本线路直连实测可用）。
@@ -55,17 +73,23 @@ https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/tvbox.json
 
 `@latest` 跟随默认分支 HEAD，**地址永远不用改**。代价是 jsDelivr 对分支引用有约 12 小时 CDN 缓存，源更新后最多滞后半天自动同步。
 
-### 立即取到最新版（版本标签）
+### 立即取到最新版（commit / 标签引用）
 
-每次重新扫描会打一个新标签，标签地址**立即生效且永久缓存**：
+分支引用有 12h 缓存，要立刻拿到新内容，用 **commit sha** 或 **版本标签**：
 
 ```
-https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261005b/mobile/iptv4_mobile.txt
+# commit sha（把 4283239 换成最新 commit 前 7 位）
+https://fastly.jsdelivr.net/gh/eye1130/iptv@4283239/mobile/iptv4_mobile.txt
+
+# 版本标签
+https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261007/mobile/iptv4_mobile.txt
 ```
 
 > ⚠️ **不要用 `@master`**。`@master` 与 `@latest` 语义相同，但实测该缓存键被 CDN 缓存了旧内容（只有 497 条，且 TTFB 高达 36.9s）。用 `@latest` 或具体标签。
 >
-> ⚠️ 标签名**不要带小段号**（`v20261005.1` 会被 jsDelivr 判 404）。用纯 `vYYYYMMDD` 或单字母后缀。
+> ⚠️ 标签名**不要带小段号**（`v20261005.1` 会被 jsDelivr 判 404）。用纯 `vYYYYMMDD`。
+>
+> ⚠️ 一个引用一旦被请求过就被 CDN 记住。**标签删了又重建指向别的 commit，会继续吐旧内容**（实测 `v20261006` 如此）。要换内容就换新引用名，别复用旧名。
 >
 > ⚠️ 实测只有 `fastly.jsdelivr.net` 可用。`cdn.jsdelivr.net`、`gcore.jsdelivr.net`、`raw.githubusercontent.com`、`gh-proxy` / `ghfast.top` / `gitmirror` 系加速在本线路**全部不可达**。
 >
