@@ -1,5 +1,8 @@
 name: Sync with Upstream Repository
 
+permissions:
+  contents: write
+
 on:
   # 允许手动触发
   workflow_dispatch:
