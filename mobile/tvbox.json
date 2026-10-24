@@ -1,0 +1,15 @@
+{
+  "sites": [],
+  "lives": [
+    {
+      "name": "直播·精简版(本线路实测)",
+      "type": 0,
+      "url": "https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile_lite.txt"
+    },
+    {
+      "name": "直播·全量(本线路实测)",
+      "type": 0,
+      "url": "https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile.txt"
+    }
+  ]
+}
