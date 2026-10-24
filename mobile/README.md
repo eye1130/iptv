@@ -38,7 +38,29 @@ TVBox 系对 m3u 通常只认每个频道的第一条，备用线路全部作废
 https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile_lite.txt
 ```
 
-`@latest` 跟随默认分支 HEAD，**地址永远不用改**，源更新后自动生效。
+`@latest` 跟随默认分支 HEAD，**地址永远不用改**。
+
+> ### ⚠️ 关于 `@latest` 的 12 小时缓存（务必读）
+>
+> jsDelivr 会把 `@latest` **解析成一个具体 commit 后缓存约 12 小时**。实测行为：
+>
+> | 情况 | 表现 |
+> |---|---|
+> | 仓库**新增**文件 | 立即能取到（旧 commit 里没有，缓存穿透） |
+> | 仓库**修改**已有文件 | 最多滞后 12 小时才拿到新内容 |
+>
+> 加 `?v=xxx` 查询参数、调用 `purge.jsdelivr.net` 都**绕不过**（实测无效，解析缓存在 CDN 之外）。
+>
+> **对使用的影响**：源每天更新一次，所以最坏情况你拿到的是 12 小时前那批。源的生命周期通常有几天，
+> 这个滞后可以接受。**但如果某天发现源大面积为 0，别急着骂源失效——很可能只是缓存还没轮到**。
+>
+> **要立刻拿最新版**：用当天的 tag 引用（tag 是全新缓存键，立即生效）：
+>
+> ```
+> https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261024/mobile/iptv4_mobile_lite.txt
+> ```
+>
+> 日常不用管这个，固定地址就行。
 
 > ⚠️ 本线路实测只有 `fastly.jsdelivr.net` 与 `testingcf.jsdelivr.net` 可用。
 > `cdn.jsdelivr.net`（TTFB 4 s+）、`gcore.jsdelivr.net`（TLS 握手直接失败）、
