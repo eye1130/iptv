@@ -40,19 +40,19 @@ https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile_lite.txt
 
 `@latest` 跟随默认分支 HEAD，**地址永远不用改**。
 
-> ### ⚠️ 关于 `@latest` 的 12 小时缓存（务必读）
+> ### ⚠️ 关于 `@latest` 的缓存（务必读）
 >
-> jsDelivr 会把 `@latest` **解析成一个具体 commit 后缓存约 12 小时**。实测行为：
+> jsDelivr 返回的响应头是 `Cache-Control: public, max-age=604800, s-maxage=43200`，即：
 >
-> | 情况 | 表现 |
-> |---|---|
-> | 仓库**新增**文件 | 立即能取到（旧 commit 里没有，缓存穿透） |
-> | 仓库**修改**已有文件 | 最多滞后 12 小时才拿到新内容 |
+> | 层级 | 缓存时长 | 说明 |
+> |---|---|---|
+> | jsDelivr CDN | **12 小时**（`s-maxage=43200`） | 这期间仓库再怎么更新都不变 |
+> | 播放器 / 浏览器 | **7 天**（`max-age=604800`） | 更要命的一层，很多播放器吃这个头 |
 >
-> 加 `?v=xxx` 查询参数、调用 `purge.jsdelivr.net` 都**绕不过**（实测无效，解析缓存在 CDN 之外）。
+> 实测 `purge.jsdelivr.net` 强制刷新**无效**（返回 `status: finished` 但内容依旧），
+> 加 `?v=xxx` 查询参数也**无效**。只能等它自然过期。
 >
-> **对使用的影响**：源每天更新一次，所以最坏情况你拿到的是 12 小时前那批。源的生命周期通常有几天，
-> 这个滞后可以接受。**但如果某天发现源大面积为 0，别急着骂源失效——很可能只是缓存还没轮到**。
+> **所以：仓库更新后，最多要等 12 小时才会在订阅地址上体现。**
 >
 > **要立刻拿最新版**：用当天的 tag 引用（tag 是全新缓存键，立即生效）：
 >
@@ -60,7 +60,9 @@ https://fastly.jsdelivr.net/gh/eye1130/iptv@latest/mobile/iptv4_mobile_lite.txt
 > https://fastly.jsdelivr.net/gh/eye1130/iptv@v20261024/mobile/iptv4_mobile_lite.txt
 > ```
 >
-> 日常不用管这个，固定地址就行。
+> **播放器那 7 天缓存**：在播放器里删掉订阅源重新添加，比「刷新」更彻底。
+>
+> 日常固定地址就行，不用管这些。
 
 > ⚠️ 本线路实测只有 `fastly.jsdelivr.net` 与 `testingcf.jsdelivr.net` 可用。
 > `cdn.jsdelivr.net`（TTFB 4 s+）、`gcore.jsdelivr.net`（TLS 握手直接失败）、
